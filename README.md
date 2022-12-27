@@ -33,8 +33,8 @@ Before you can use Frida to instrument an Android app, you will need to set up a
 
 - Get CPU architecture of your device/emulator
 
-- adb shell getprop ro.product.cup.abi
-- adb shell getprop ro.product.cup.abilist
+- `adb shell getprop ro.product.cup.abi`
+- `adb shell getprop ro.product.cup.abilist`
 
 To set up the Frida server on your device, follow these steps:
 
@@ -73,7 +73,7 @@ Now that Frida is injected into the app's process, you can use it to manipulate 
 
 Here is a simple example of how you can use Frida to change the behavior of an Android app:
 
-```
+```javascript
 Java.perform(function() {
   // Find the class we want to manipulate
   var targetClass = Java.use("com.example.app.TargetClass");
