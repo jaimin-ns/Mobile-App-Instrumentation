@@ -60,12 +60,31 @@ To interact with android app using Frida, follow these steps:
 1. Make sure the Frida server is running on your device
 2. Find the package name of the app you want to instrument (e.g. com.example.app)
 3. Run the following command to list the processes running on your device: frida-ps -U
-4. Find the process ID of the app you want to instrument in the list of processes.
+4. Find the package name of the app you want to instrument in the list of processes.
 5. Run the following command to inject Frida into the app's process: frida -U -f com.example.app -l script.js
 
 Where com.example.app is the package name of the app, and script.js is the name of the JavaScript script that will be injected into the app's process.
 
 The Frida library should now be injected into the app's process, and you should see a message in the terminal indicating that Frida is running.
+
+#### Multiple ways to attach to runnine processes
+
+#### 1. Interactive
+
+1. Run `frida -U -f <Package name>`
+2. This creates an interactive shell
+3. Write your scripts inside this shell
+
+#### 2. Attach script
+
+1. Write the frida script inside the .js file
+2. Pass it as an argument using -l option
+3. Run `frida -U -f <Package name> -l <agent.js>`
+4. The frida script will be excuted prallaly with target application execution
+
+#### 3. Python script
+
+1. 
 
 ### Manipulating the behavior of an Android app using Frida
 
