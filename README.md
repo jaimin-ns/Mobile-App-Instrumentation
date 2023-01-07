@@ -228,7 +228,7 @@ Spawned `hpandro.android.security`. Resuming main thread!
 
 ## Steps of instrumentation with frida
 
-1. Enumerate loded classes with frida
+1. Enumerate loaded classes with frida
 2. List methods and properties of a class
 3. Hook the target function
 4. Dumping function parameters
@@ -236,7 +236,7 @@ Spawned `hpandro.android.security`. Resuming main thread!
 6. Modifying the function behaviour
 
 
-## Enumerate loded classes with frida
+## Enumerate loaded classes with frida
 
 - List classes of target application
 
