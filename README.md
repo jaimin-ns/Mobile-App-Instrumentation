@@ -315,6 +315,7 @@ Java.perform(() => {
 
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l func-call.js
+
 Java.perform(()=>{
   const rootcheckclass = Java.use("sg.vantagepoint.a.c");
 
@@ -329,6 +330,7 @@ Java.perform(()=>{
 
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l func-call.js
+
 Java.perform(()=>{
   const rootcheckclass = Java.use("sg.vantagepoint.a.c");
 
@@ -340,6 +342,8 @@ Java.perform(()=>{
 ```
 
 ```javascript
+// frida -U -f owasp.mstg.uncrackable1 -l crackme1-rootbypass.js
+
 Java.perform(()=>{
     const rootcheckclass = Java.use("sg.vantagepoint.a.c");
 
@@ -364,7 +368,23 @@ Java.perform(()=>{
 
 ## Dumping function parameters
 
-`frida -U -n "Uncrackable1" -l dump-function-parameters.js`
+`frida -U -f owasp.mstg.uncrackable1 -l dump-function-parameters.js`
+
+```javascript
+// frida -U -f owasp.mstg.uncrackable1 -l dump-function-parameters.js
+
+Java.perform(()=>{
+
+    const classa = Java.use("sg.vantagepoint.uncrackable1.a");
+
+    classa.a.overload("java.lang.String").implementation = function(s){
+        console.log(s.toString());
+
+        return true;
+    }
+});
+
+```
 
 - changed return true for method a of class a
 - And dumped function parameters
@@ -376,6 +396,7 @@ Java.perform(()=>{
 
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js
+
 Java.perform(()=>{
   // base64 decode
 
@@ -385,7 +406,6 @@ Java.perform(()=>{
   // b function
   const bfunclass = Java.use("sg.vantagepoint.uncrackable1.a");
   var encKey = bfunclass.b("8d127684cbc37c17616d806cf50473cc");
-
 
   // a function
   const afunclass = Java.use("sg.vantagepoint.a.a");
