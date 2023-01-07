@@ -199,70 +199,171 @@ socket      remote  Local Socket
 
 - Let's create a Hello world script to understand the basics.
 
-```
+```javascript
 // helloscript.js
 
 Java.perform(()=>{
     console.log("hello world, bye");
 });
 ```
-
-`frida -U -f hpandro.android.security -l helloscript.js`
-
-
-
-`Java.perform();`
-
-- Annonymas function
+- Inside the block of code passed to Java.perform(), you can use the Frida JavaScript API to interact with the Android runtime and perform various tasks, such as enumerating loaded classes, hooking method calls, and modifying field values.
 
 ```
-Java.perform(() => {
+# frida -U -f hpandro.android.security -l helloscript.js
 
-});
-
-Java.perform(function(){
-
-});
+     ____
+    / _  |   Frida 16.0.7 - A world-class dynamic instrumentation toolkit
+   | (_| |
+    > _  |   Commands:
+   /_/ |_|       help      -> Displays the help system
+   . . . .       object?   -> Display information about 'object'
+   . . . .       exit/quit -> Exit
+   . . . .
+   . . . .   More info at https://frida.re/docs/home/
+   . . . .
+   . . . .   Connected to motorola one power (id=ZF6223RG45)
+Spawned `hpandro.android.security`. Resuming main thread!               
+[motorola one power::hpandro.android.security ]-> hello world, bye
 ```
 
-## Frida script to load classes
+## Steps of instrumentation with frida
 
-- List classes of hello world app
-- Java.enumerateLoadedClasses
+1. Enumerate loded classes with frida
+2. List methods and properties of a class
+3. Hook the target function
+4. Dumping function parameters
+5. Re-using app functions in Frida scripts
+6. Modifying the function behaviour
 
-- how to rerun the scripts ctrl + s & enter
 
+## Enumerate loded classes with frida
+
+- List classes of target application
+
+```
+Java.enumerateLoadedClasses(callbacks): enumerate classes loaded right now, where callbacks is an object specifying:
+
+onMatch(name, handle): called for each loaded class with name that may be passed to use() to get a JavaScript wrapper.
+
+onComplete(): called when all classes have been enumerated
+```
+
+```javascript
+// frida -U -f hpandro.android.security -l listclasses.js
+
+Java.perform(()=>{
+    Java.enumerateLoadedClasses({
+        onMatch : function(name, handle){
+            if(name.includes("AES")){
+                console.log(name);
+            }
+            
+        },
+        onComplete : function(){
+            console.log("--- done ---");
+        }
+    });
+});
+```
 
 `frida -U -f com.example.helloapp -l listclasses.js`
 `frida -U -f hpandro.android.security -l listclasses.js`
 
 hpandro.android.security.ui.activity.task.encryption.AESActivity
 
-## List methods and properties
+## List methods and properties of a class
 
-- Java.use()
-	- Create a a wrapper of class
-	- mention the class name
+### Method - 1
 
-	- can use CONST or var
-- 
+- `Java.use()`
+  - `Java.use(className):` dynamically get a JavaScript wrapper for className that you can instantiate objects from by calling `$new()` on it to invoke a constructor.
+	- Mention the class name inside `Java.use()`
+	- We can use CONST or var to store `Java.use()`
 
-## Hook functions
+```javascript
+// frida -U -f hpandro.android.security -l list-methods-and-properties.js
 
-- How to use frida to hook functions(methods)
+Java.perform(()=>{
+    console.log("--- ok ---");
+    const activityclass = Java.use("hpandro.android.security.ui.activity.task.encryption.AESActivity");
+    console.log(activityclass);
+    console.log(Object.getOwnPropertyNames(activityclass).join("\n\t"));
+});
+```
+`frida -U -f hpandro.android.security -l list-methods-and-properties.js`
+
+### Method - 2
+
+`Java.enumerateMethods(query):` enumerate methods matching query, specified as `"class!method"`.
+
+```javascript
+// frida -U -f hpandro.android.security -l list-methods-and-properties-1.js
+
+Java.perform(() => {
+  const groups = Java.enumerateMethods('*AES*!*decrypt*')
+  console.log(JSON.stringify(groups, null, 2));
+});
+```
+
+## Hook the target function
+
+- Decompile APK using Jadx and identify target function to hook
+
+- Write coresponding frida script
+
+- check if function is called
+
+```javascript
+// frida -U -f owasp.mstg.uncrackable1 -l func-call.js
+Java.perform(()=>{
+  const rootcheckclass = Java.use("sg.vantagepoint.a.c");
+
+  rootcheckclass.a.implementation = function(){
+    console.log("a() function called!");
+    return true;
+  }
+});
+```
+
 - modify the function's return values
 
-```
-const rootcheckclass = Java.use("sg.vantagepoint.a.c");
+```javascript
+// frida -U -f owasp.mstg.uncrackable1 -l func-call.js
+Java.perform(()=>{
+  const rootcheckclass = Java.use("sg.vantagepoint.a.c");
 
-rootcheckclass.a.implementation = function(){
-	
-}
+  rootcheckclass.a.implementation = function(){
+    console.log("a() function called!");
+    return false;
+  }
+});
 ```
+
+```javascript
+Java.perform(()=>{
+    const rootcheckclass = Java.use("sg.vantagepoint.a.c");
+
+    rootcheckclass.a.implementation = function(){
+        console.log("--bypass c.a()--");
+        return false;
+    }
+
+    rootcheckclass.b.implementation = function(){
+        console.log("--bypass c.b()--");
+        return false;
+    }
+
+    rootcheckclass.c.implementation = function(){
+        console.log("--bypass c.c()--");
+        return false;
+    }
+});
+```
+
+`frida -U -f owasp.mstg.uncrackable1 -l crackme1-rootbypass.js`
 
 ## Dumping function parameters
 
-`frida -U -f owasp.mstg.uncrackable1 -l crackme1-rootbypass.js`
 `frida -U -n "Uncrackable1" -l dump-function-parameters.js`
 
 - changed return true for method a of class a
@@ -270,11 +371,36 @@ rootcheckclass.a.implementation = function(){
 
 ## Re-using app functions in Frida scripts and decrypting passwords
 
-- Create sleleton of the target function in JS
-
-- $new
+- `$new`
 	- Instantiate objects by calling $new()
-	- 
+
+```javascript
+// frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js
+Java.perform(()=>{
+  // base64 decode
+
+  const base64 = Java.use("android.util.Base64");
+  var arrayofbytes = base64.decode("5UJiFctbmgbDoLXmpL12mkno8HT4Lv8dlat8FxR2GOc=",0);
+
+  // b function
+  const bfunclass = Java.use("sg.vantagepoint.uncrackable1.a");
+  var encKey = bfunclass.b("8d127684cbc37c17616d806cf50473cc");
+
+
+  // a function
+  const afunclass = Java.use("sg.vantagepoint.a.a");
+  var decryptedarray = afunclass.a(encKey, arrayofbytes);
+
+  // convert to string and show
+  const strclass = Java.use("java.lang.String");
+  var decryptedpass = strclass.$new(decryptedarray);
+  console.log(decryptedpass);
+});
+```
+
+`frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js`
+
+## Test Cases
 
 ## Resources
 
