@@ -51,6 +51,10 @@ Next step is to setup frida on the system,run followin to install frida on the s
 
 `pip3 install frida-tools`
 
+### Installing Vulnerable apps
+
+- INSERT DRIVE LINK
+
 ### Interacting with android app using Frida
 
 Now that the Frida server is set up on your device, you can use Frida to instrument an Android app. 
@@ -59,9 +63,9 @@ To interact with android app using Frida, follow these steps:
 
 1. Make sure the Frida server is running on your device
 2. Find the package name of the app you want to instrument (e.g. com.example.app)
-3. Run the following command to list the processes running on your device: frida-ps -U
+3. Run the following command to list the processes running on your device: `frida-ps -U`
 4. Find the package name of the app you want to instrument in the list of processes.
-5. Run the following command to inject Frida into the app's process: frida -U -f com.example.app -l script.js
+5. Run the following command to inject Frida into the app's process: `frida -U -f com.example.app -l script.js`
 
 Where com.example.app is the package name of the app, and script.js is the name of the JavaScript script that will be injected into the app's process.
 
@@ -122,19 +126,90 @@ Frida provides many advanced features that allow you to perform more sophisticat
 - Bypassing client side encryption
 - Client side checks such as ROOT detection, SSL pinning, Emulator detection, Biomatric Authentication
 
-I hope this section has given you a good introduction to Frida and dynamic instrumentation on Android. With Frida, you can unlock the full potential of Android apps and use them in ways that were never intended by their developers. Let's dive into more details, Happy hacking!
-
-
-## Frida script/command injection
-
-- 
+I hope this section has given you a good introduction to Frida and dynamic instrumentation on Android. With Frida, you can unlock the full potential of Android apps and use them in ways that were never intended by their developers. Let's dive into more details, Happy hacking! 
 
 
 ## Understanding the Frida CLI
 
-- 
+- Here is an example of how to use the Frida CLI to list the process names and IDs on a device:
+
+```
+# frida-ps -Uai
+
+PID  Name                      Identifier                             
+  ------------------------  ---------------------------------------
+10780  Android Security Testing  hpandro.android.security               
+11856  Camera                    com.motorola.ts.camera                 
+12231  Chrome                    com.android.chrome                     
+ 6148  Exchanges                 com.exchanges                          
+ 5926  Google                    com.google.android.googlequicksearchbox
+24359  Google Play Store         com.android.vending                    
+26998  Motorola Notifications    com.motorola.ccc.notification          
+11402  Photos                    com.google.android.apps.photos         
+11696  YouTube                   com.google.android.youtube   
+```
+
+- If you have multiple devices connected you should run following
+
+```
+# frida-ls-devices  
+
+Id          Type    Name                OS                   
+----------  ------  ------------------  ---------------------
+local       local   ns                  Kali GNU/Linux 2022.4
+ZF6223RG45  usb     motorola one power  Android 10           
+socket      remote  Local Socket 
+```
+
+- With -D option you can specify which device you want to interect with
+
+```
+# frida-ps -D ZF6223RG45
+
+  PID  Name
+-----  -------------------------------------------------------------------------------------------------
+30004  .dataservices                                                                                    
+30020  .qtidataservices                                                                                 
+ 1508  ATFWD-daemon                                                                                     
+10780  Android Security Testing                                                                         
+11856  Camera                                                                                           
+ 6148  Exchanges                                                                                        
+ 5926  Google                                                                                           
+24359  Google Play Store                                                                                
+13047  Moto Audio                                                                                       
+26998  Motorola Notifications
+```
+
+- Few more important flags are listed below
+
+```
+-f TARGET, --file TARGET
+                        spawn FILE
+-F, --attach-frontmost
+		attach to frontmost application
+-n NAME, --attach-name NAME
+		attach to NAME
+-N IDENTIFIER, --attach-identifier IDENTIFIER
+		attach to IDENTIFIER
+-p PID, --attach-pid PID
+		attach to PID
+```
 
 ## Hello world script
+
+- Let's create a Hello world script to understand the basics.
+
+```
+// helloscript.js
+
+Java.perform(()=>{
+    console.log("hello world, bye");
+});
+```
+
+`frida -U -f hpandro.android.security -l helloscript.js`
+
+
 
 `Java.perform();`
 
@@ -149,8 +224,6 @@ Java.perform(function(){
 
 });
 ```
-
-frida -U -f com.example.helloapp -l helloscript.js
 
 ## Frida script to load classes
 
