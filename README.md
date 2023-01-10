@@ -2,6 +2,16 @@
 
 Welcome to the Frida instrumentation workshop for Android! In this workshop, you will learn how to use Frida, a powerful dynamic instrumentation tool, to manipulate the behavior of Android apps at runtime.
 
+### What is Dynamic binary instrumentation?
+
+- Dynamic binary instrumentation (DBI) can be thought of as a technique used by a spy organization to gather information about the inner workings of another organization.
+
+Imagine that there is a secret spy organization that wants to learn more about the operations of a rival organization. One way they could do this is by sending in a spy to gather information from inside the rival organization. This spy could observe meetings, read documents, and gather other types of information about the rival organization's activities.
+
+Now imagine that the rival organization has a number of different programs that it uses to run its operations. These programs might be used to manage finances, communicate with employees, or perform other tasks. The spy organization could use dynamic binary instrumentation to analyze and modify these programs while they are running in order to gather more information about the rival organization's activities.
+
+In this analogy, the rival organization is like a compiled program, and the spy organization is like a DBI tool. Just as the spy gathers information by observing and interacting with the rival organization, the DBI tool gathers information by analyzing and modifying the compiled program.
+
 Before you get started, you will need to make sure you have the following prerequisites:
 
 - A computer running macOS, Linux, or Windows
@@ -47,7 +57,7 @@ To set up the Frida server on your device, follow these steps:
 
 The Frida server should now be running on your device and ready for use.
 
-Next step is to setup frida on the system,run followin to install frida on the system.
+Next step is to setup frida on the system,run following to install frida on the system.
 
 `pip3 install frida-tools`
 
@@ -371,7 +381,7 @@ Java.perform(()=>{
 `frida -U -f owasp.mstg.uncrackable1 -l dump-function-parameters.js`
 
 ```javascript
-// frida -U -f owasp.mstg.uncrackable1 -l dump-function-parameters.js
+// frida -U -n "Uncrackable1" -l dump-function-parameters.js
 
 Java.perform(()=>{
 
@@ -422,6 +432,79 @@ Java.perform(()=>{
 
 ## Test Cases
 
+### Spoof geo location
+
+- Spoof geo location of android google maps
+
+```javascript
+// frida -U -f com.google.android.apps.maps
+
+Java.perform(() => {
+  var Location = Java.use('android.location.Location');
+  Location.getLatitude.implementation = function() {
+    return 26.4679656;
+  }
+  Location.getLongitude.implementation = function() {
+    return 74.6343847;
+  }
+})
+```
+
+### AES Encryption bypass
+
+- Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
+
+- Application is: com.hpandro.androidsecurity_1.3.apk
+https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share_link
+
+```javascript
+// frida -U -f hpandro.android.security -l "hp andro/decrypt.js"
+
+Java.perform(function x() {
+    var String = Java.use("java.lang.String"); 
+    var ScopeObject = Java.use("hpandro.android.security.ui.activity.task.encryption.AESActivity");
+    var scopeInstance = ScopeObject.$new();
+
+    console.log(scopeInstance.decryptStrAndFromBase64('dfdfdf','hpAndro','UhIF1tR4HCQOdf1SXQXVOIeT7L4yd76Yh0K7ULfGJCkOcjB7OrAciDuA0/HlpfeR'));
+})
+```
+### Enable remote debugging of Android WebViews at Runtime
+
+- Often we deal with cross platform apps in our pentests. This tricks comes in really handy to debug the application logic.
+
+```javascript
+Java.perform(function() {
+        Java.choose("android.webkit.WebView", {
+            "onMatch": function(o) {
+                try {
+                    // Use a Runnable to invoke the setWebContentsDebuggingEnabled
+                    // method in the same thread as the WebView
+                    var Runnable = Java.use('java.lang.Runnable');
+                    var MyRunnable = Java.registerClass({
+                        name: 'com.example.MyRunnable',
+                        implements: [Runnable],
+                        methods: {
+                            'run': function() {
+                                o.setWebContentsDebuggingEnabled(true);
+                                console.log('WebView Debugging should be enabled');
+                            }
+                        }
+                    });
+                    var runnable = MyRunnable.$new();
+                    o.post(runnable);
+                } catch (e) {
+                    console.log("Execution failed " + e.message);
+                }
+            },
+            "onComplete": function() {
+                console.log("Execution completed")
+            }
+        })
+    }
+);
+```
+
 ## Resources
 
+https://www.youtube.com/watch?v=JK8Azi7f13E
 https://www.youtube.com/watch?v=0QIJRjdnT2I
