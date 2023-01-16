@@ -430,7 +430,7 @@ Java.perform(()=>{
 
 `frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js`
 
-## Test Cases
+## Use Cases
 
 ### Spoof geo location
 
@@ -468,6 +468,45 @@ Java.perform(function x() {
     console.log(scopeInstance.decryptStrAndFromBase64('dfdfdf','hpAndro','UhIF1tR4HCQOdf1SXQXVOIeT7L4yd76Yh0K7ULfGJCkOcjB7OrAciDuA0/HlpfeR'));
 })
 ```
+
+### RSA Encryption bypass
+
+- Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
+
+- Application is: com.hpandro.androidsecurity_1.3.apk
+https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share_link
+
+
+```javascript
+// frida -U -f hpandro.android.security -l "/media/jaimin/data/Handy stuff/Presentation/Mobile App Instrumentation/Scripts/hp andro/rsa-decrypt.js"
+
+Java.perform(function () {
+    var classname = "hpandro.android.security.ui.activity.task.encryption.RSAActivity";
+    var classmethod = "decrypt";
+    var methodsignature = "public final byte[] decrypt(java.security.PrivateKey,byte[]) throws java.security.NoSuchAlgorithmException,javax.crypto.NoSuchPaddingException,java.security.InvalidKeyException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException";
+    var hookclass = Java.use(classname);
+    
+    hookclass.decrypt.overload("java.security.PrivateKey","[B").implementation = function (v0,v1) {
+        send("[Call_Stack]\nClass: " +classname+"\nMethod: "+methodsignature+"\n");
+        var ret = this.decrypt(v0,v1);
+        
+        var s="";
+        s=s+"[Hook_Stack]\n"
+        s=s+"Class: " +classname+"\n"
+        s=s+"Method: " +methodsignature+"\n"
+        s=s+"Called by: "+Java.use('java.lang.Exception').$new().getStackTrace().toString().split(',')[1]+"\n"
+        s=s+"Input: "+eval(v0,v1)+"\n";
+        s=s+"Output: "+ret+"\n";
+
+        var str = String.fromCharCode.apply(null, ret);
+
+        console.log(str);  // Outputs "Hello"
+                
+        return ret;
+    };
+});
+```
+
 ### Enable remote debugging of Android WebViews at Runtime
 
 - Often we deal with cross platform apps in our pentests. This tricks comes in really handy to debug the application logic.
