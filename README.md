@@ -478,7 +478,7 @@ https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share
 
 
 ```javascript
-// frida -U -f hpandro.android.security -l "/media/jaimin/data/Handy stuff/Presentation/Mobile App Instrumentation/Scripts/hp andro/rsa-decrypt.js"
+// frida -U -f hpandro.android.security -l "/Scripts/hp andro/rsa-decrypt.js"
 
 Java.perform(function () {
     var classname = "hpandro.android.security.ui.activity.task.encryption.RSAActivity";
