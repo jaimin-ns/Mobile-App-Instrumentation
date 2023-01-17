@@ -218,6 +218,9 @@ Java.perform(()=>{
 ```
 - Inside the block of code passed to Java.perform(), you can use the Frida JavaScript API to interact with the Android runtime and perform various tasks, such as enumerating loaded classes, hooking method calls, and modifying field values.
 
+- Java.perform() is use to hook into the JVM
+  - We have access to methods and classes in the memory
+
 ```
 # frida -U -f hpandro.android.security -l helloscript.js
 
@@ -242,7 +245,7 @@ Spawned `hpandro.android.security`. Resuming main thread!
 2. List methods and properties of a class
 3. Hook the target function
 4. Dumping function parameters
-5. Re-using app functions in Frida scripts
+5. Playing around with instances & Modifying the parameter values
 6. Modifying the function behaviour
 
 
@@ -399,10 +402,65 @@ Java.perform(()=>{
 - changed return true for method a of class a
 - And dumped function parameters
 
-## Re-using app functions in Frida scripts and decrypting passwords
+## Playing around with instances & Modifying the parameter values
+
+- We need to work with existing instance sometimes
+  - Scan application memory to find the instances
+  - `Java.choose(className, callbacks):` enumerate live instances of the `className` class by scanning the Java heap, where callbacks is an object specifying:
+
+  - `onMatch(instance):` called with each live instance found with a ready-to-use instance.
+
+  - `onComplete():` called when all instances have been enumerated
+
+```javascript
+Java.perform(function() {
+
+    // We are scanning the application memory for existing instances of the Class.
+    Java.choose('com.example.classname', {
+        // onMatch - Callback => If an instance has been found,
+        onMatch: function(instance) {
+            // code if an instance has been found
+            send("An instance of the class has been found = " + instance)
+
+            // Do operations on the found instance
+        },
+        // onComplete - Callback => Finished scanning the app memory regarding to the instance.
+        onComplete: function() {
+            send("Frida has finished scanning the application memory for class instances")
+        }
+
+    })
+})
+```
+
+## Modifying the parameter values
+
+- 
+
+## Use Cases
+
+### Spoof geo location
+
+- Spoof geo location of android google maps
+
+```javascript
+// frida -U -f com.google.android.apps.maps
+
+Java.perform(() => {
+  var Location = Java.use('android.location.Location');
+  Location.getLatitude.implementation = function() {
+    return 26.4679656;
+  }
+  Location.getLongitude.implementation = function() {
+    return 74.6343847;
+  }
+})
+```
+
+### Re-using app functions in Frida scripts and decrypting passwords
 
 - `$new`
-	- Instantiate objects by calling $new()
+  - Instantiate objects by calling $new()
 
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js
@@ -429,26 +487,6 @@ Java.perform(()=>{
 ```
 
 `frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js`
-
-## Use Cases
-
-### Spoof geo location
-
-- Spoof geo location of android google maps
-
-```javascript
-// frida -U -f com.google.android.apps.maps
-
-Java.perform(() => {
-  var Location = Java.use('android.location.Location');
-  Location.getLatitude.implementation = function() {
-    return 26.4679656;
-  }
-  Location.getLongitude.implementation = function() {
-    return 74.6343847;
-  }
-})
-```
 
 ### AES Encryption bypass
 
