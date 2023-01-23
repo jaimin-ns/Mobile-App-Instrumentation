@@ -2,6 +2,12 @@
 
 Welcome to the Frida instrumentation workshop for Android! In this workshop, you will learn how to use Frida, a powerful dynamic instrumentation tool, to manipulate the behavior of Android apps at runtime.
 
+### Authors
+- [Jaimin Gohel](https://twitter.com/jaimin_gohel)
+- [Viral Bhatt](https://twitter.com/viralbhatt100)
+
+- Presented at: [NSConclave2023](https://nsconclave.net-square.com)
+
 ### What is Dynamic binary instrumentation?
 
 - Dynamic binary instrumentation (DBI) can be thought of as a technique used by a spy organization to gather information about the inner workings of another organization.
@@ -432,10 +438,7 @@ Java.perform(function() {
     })
 })
 ```
-
-## Modifying the parameter values
-
-- 
+dice game apk
 
 ## Use Cases
 
@@ -496,16 +499,18 @@ Java.perform(()=>{
 https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share_link
 
 ```javascript
-// frida -U -f hpandro.android.security -l "hp andro/decrypt.js"
+// frida -U -f hpandro.android.security -l "hp andro/aes-decrypt.js"
 
 Java.perform(function x() {
-    var String = Java.use("java.lang.String"); 
     var ScopeObject = Java.use("hpandro.android.security.ui.activity.task.encryption.AESActivity");
     var scopeInstance = ScopeObject.$new();
 
     console.log(scopeInstance.decryptStrAndFromBase64('dfdfdf','hpAndro','UhIF1tR4HCQOdf1SXQXVOIeT7L4yd76Yh0K7ULfGJCkOcjB7OrAciDuA0/HlpfeR'));
 })
 ```
+
+- Perform above task with `Java.choose()`
+- Perform DES task in hpAndro
 
 ### RSA Encryption bypass
 
@@ -516,30 +521,17 @@ https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share
 
 
 ```javascript
-// frida -U -f hpandro.android.security -l "/Scripts/hp andro/rsa-decrypt.js"
+// frida -U -f hpandro.android.security -l "/hp andro/rsa-decrypt.js"
 
 Java.perform(function () {
-    var classname = "hpandro.android.security.ui.activity.task.encryption.RSAActivity";
-    var classmethod = "decrypt";
-    var methodsignature = "public final byte[] decrypt(java.security.PrivateKey,byte[]) throws java.security.NoSuchAlgorithmException,javax.crypto.NoSuchPaddingException,java.security.InvalidKeyException,javax.crypto.IllegalBlockSizeException,javax.crypto.BadPaddingException";
-    var hookclass = Java.use(classname);
-    
-    hookclass.decrypt.overload("java.security.PrivateKey","[B").implementation = function (v0,v1) {
-        send("[Call_Stack]\nClass: " +classname+"\nMethod: "+methodsignature+"\n");
-        var ret = this.decrypt(v0,v1);
-        
-        var s="";
-        s=s+"[Hook_Stack]\n"
-        s=s+"Class: " +classname+"\n"
-        s=s+"Method: " +methodsignature+"\n"
-        s=s+"Called by: "+Java.use('java.lang.Exception').$new().getStackTrace().toString().split(',')[1]+"\n"
-        s=s+"Input: "+eval(v0,v1)+"\n";
-        s=s+"Output: "+ret+"\n";
+    let RSAActivity = Java.use("hpandro.android.security.ui.activity.task.encryption.RSAActivity");
+    RSAActivity["decrypt"].implementation = function (privateKey, bArr) {
+        console.log('decrypt is called' + ', ' + 'privateKey: ' + privateKey + ', ' + 'bArr: ' + bArr);
+        let ret = this.decrypt(privateKey, bArr);
 
-        var str = String.fromCharCode.apply(null, ret);
-
-        console.log(str);  // Outputs "Hello"
-                
+        const strclass = Java.use("java.lang.String");
+        var decryptedpass = strclass.$new(ret);
+        console.log('decrypt ret value is ' + decryptedpass);
         return ret;
     };
 });
@@ -581,7 +573,45 @@ Java.perform(function() {
 );
 ```
 
-## Resources
+### Hacking a vulnerable bank application
 
-https://www.youtube.com/watch?v=JK8Azi7f13E
-https://www.youtube.com/watch?v=0QIJRjdnT2I
+- Setup the Damn Vulnerable Bank 
+  - https://github.com/rewanthtammana/Damn-Vulnerable-Bank
+
+Username | Password | Account Number | Beneficiaries | Admin privileges
+--- | --- | --- | --- | ---
+user1 | password1 | 111111 | 222222, 333333, 444444 | No
+user2 | password2 | 222222 | None | No
+user3 | password3 | 333333 | None | No
+user4 | password4 | 444444 | None | No
+admin | admin | 999999 | None | Yes
+
+- Bypass basic frida detection
+- Start the frida server on different port
+  - `./frida -l 0.0.0.0:1337`
+
+- Connect to frida using `-H` flag
+  - `frida -H 192.168.56.101:1337 -f com.app.damnvulnerablebank`
+
+- Bypass root detection using frida
+
+- Dump the encrypted and plain-text response
+- Get `accesstoken` from shared preference
+  - https://codeshare.frida.re/@ninjadiary/frinja---sharedpreferences/
+
+- bypass fingerprint check while Sending money
+  - https://github.com/WithSecureLabs/android-keystore-audit/blob/master/frida-scripts/fingerprint-bypass.js
+
+- Get data from clipboard
+
+- Log everything!
+
+## Resources & Credits
+
+- https://frida.re/docs/home/
+- https://github.com/RavikumarRamesh/hpAndro1337
+- https://github.com/rewanthtammana/Damn-Vulnerable-Bank
+- https://github.com/WithSecureLabs/android-keystore-audit/blob/master/frida-scripts
+- https://github.com/apkunpacker/FridaScripts/
+- https://www.youtube.com/watch?v=JK8Azi7f13E
+- https://www.youtube.com/watch?v=0QIJRjdnT2I
