@@ -67,10 +67,6 @@ Next step is to setup frida on the system,run following to install frida on the 
 
 `pip3 install frida-tools`
 
-### Installing Vulnerable apps
-
-- INSERT DRIVE LINK
-
 ### Interacting with android app using Frida
 
 Now that the Frida server is set up on your device, you can use Frida to instrument an Android app. 
@@ -152,6 +148,8 @@ I hope this section has given you a good introduction to Frida and dynamic instr
 ## Understanding the Frida CLI
 
 - Here is an example of how to use the Frida CLI to list the process names and IDs on a device:
+
+- Download: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
 
 ```
 # frida-ps -Uai
@@ -508,7 +506,7 @@ Java.perform(()=>{
 
 - Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
 
-- Application is: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
+- Download: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
 
 ```javascript
 // frida -U -f hpandro.android.security -l "hp andro/aes-decrypt.js"
@@ -528,7 +526,7 @@ Java.perform(function x() {
 
 - Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
 
-- Application is: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
+- Download: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
 
 
 ```javascript
