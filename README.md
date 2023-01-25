@@ -1,4 +1,4 @@
-## Frida instrumentation for android
+## Workshop: Frida instrumentation for android
 
 Welcome to the Frida instrumentation workshop for Android! In this workshop, you will learn how to use Frida, a powerful dynamic instrumentation tool, to manipulate the behavior of Android apps at runtime.
 
@@ -104,7 +104,11 @@ The Frida library should now be injected into the app's process, and you should 
 
 #### 3. Python script
 
-1. 
+- Using Python and JS allows for quick development with a risk-free API. Frida can help you easily catch errors in JS and provide you an exception rather than crashing.
+
+1. Create a python file to spawn the target process
+2. Write an agent in JS for the hooking logic
+3. Use JS inside your python file to interact with process
 
 ### Manipulating the behavior of an Android app using Frida
 
@@ -438,7 +442,12 @@ Java.perform(function() {
     })
 })
 ```
-dice game apk
+
+### CTF Challenges
+
+- dice game
+- fridaFunc
+- clickMe
 
 ## Use Cases
 
