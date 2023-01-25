@@ -336,6 +336,8 @@ Java.perform(() => {
 
 - check if function is called
 
+- [Download APK](https://github.com/OWASP/owasp-mastg/tree/master/Crackmes/Android/Level_01)
+
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l func-call.js
 
@@ -474,6 +476,8 @@ Java.perform(() => {
 - `$new`
   - Instantiate objects by calling $new()
 
+- [Download APK](https://github.com/OWASP/owasp-mastg/tree/master/Crackmes/Android/Level_01)
+
 ```javascript
 // frida -U -f owasp.mstg.uncrackable1 -l decrypt-and-show.js
 
@@ -504,8 +508,7 @@ Java.perform(()=>{
 
 - Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
 
-- Application is: com.hpandro.androidsecurity_1.3.apk
-https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share_link
+- Application is: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
 
 ```javascript
 // frida -U -f hpandro.android.security -l "hp andro/aes-decrypt.js"
@@ -525,8 +528,7 @@ Java.perform(function x() {
 
 - Here we have task to identify the encryption logic and try to decrypt the string presented at the start of activity.
 
-- Application is: com.hpandro.androidsecurity_1.3.apk
-https://drive.google.com/file/d/1Me-ydIj8z4TZ7Q-PSYKzEJ1rmzVm1icP/view?usp=share_link
+- Application is: [com.hpandro.androidsecurity_1.3.apk](https://github.com/RavikumarRamesh/hpAndro1337/tree/main/Android%20AppSec%20(Kotlin)/1.3)
 
 
 ```javascript
@@ -620,6 +622,7 @@ admin | admin | 999999 | None | Yes
 - https://frida.re/docs/home/
 - https://github.com/RavikumarRamesh/hpAndro1337
 - https://github.com/rewanthtammana/Damn-Vulnerable-Bank
+- https://github.com/OWASP/owasp-mastg/tree/master/Crackmes/Android
 - https://github.com/WithSecureLabs/android-keystore-audit/blob/master/frida-scripts
 - https://github.com/apkunpacker/FridaScripts/
 - https://www.youtube.com/watch?v=JK8Azi7f13E
